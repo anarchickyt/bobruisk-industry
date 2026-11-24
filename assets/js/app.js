@@ -218,34 +218,6 @@
       : `<li style="padding:16px 0">Ничего не нашлось. Попробуйте «технолог», «механик» или «качеству».</li>`;
   }
 
-  /* ================= SALARIES ================= */
-  let salTech = true;
-  function salPage() {
-    const lo = 1000, hi = 4000, X = v => (v - lo) / (hi - lo) * 100, ticks = [1000, 1500, 2000, 2500, 3000, 3500, 4000];
-    const rows = C.flatMap(c => c.vacancies.filter(v => (v.min || v.max) && (salTech || !v.tech)).map(v => Object.assign({ c }, v)))
-      .sort((a, b) => (b.max || b.min) - (a.max || a.min) || (b.min || 0) - (a.min || 0));
-    const grid = ticks.map(t => `<span class="sal__grid" style="left:${X(t)}%"></span>`).join("");
-    return `<section class="slide fade-in">
-      <h1 class="slide-title">Сколько платят</h1>
-      <p class="slide-sub">Вилки зарплат в открытых вакансиях бобруйских предприятий, BYN в месяц (ноябрь 2026). Нажмите на строку, чтобы открыть вакансии завода.</p>
-      <div class="filters"><button class="chip" id="salTech" aria-pressed="${!salTech}">Только инженерные должности</button></div>
-      <div class="paper salchart">
-        <div class="sal__axis"><div></div><div class="sal__ticks">${ticks.map(t => `<span style="left:${X(t)}%">${fmt(t)}</span>`).join("")}</div></div>
-        ${rows.map(v => {
-          let a, b, cls = v.tech ? "tech" : "";
-          if (v.min && v.max) { a = v.min; b = v.max; }
-          else if (v.min) { a = v.min; b = Math.min(v.min + 700, hi); cls += " open-r"; }
-          else { a = Math.max(v.max - 900, lo); b = v.max; cls += " open-l"; }
-          const right = X(b) > 78;
-          return `<a class="sal__row" href="#/c/${v.c.id}/vac"><div class="sal__lab"><b>${esc(v.title)}</b><span>${esc(v.c.short)}</span><span class="sal__m">${pay(v)} BYN</span></div>
-            <div class="sal__track">${grid}<span class="sal__bar ${cls}" style="left:${X(a)}%;width:${X(b) - X(a)}%"></span>
-            <span class="sal__val" style="${right ? `right:${100 - X(a)}%;margin-right:8px` : `left:${X(b)}%;margin-left:${a === b ? 20 : 8}px`}">${pay(v)}</span></div></a>`;
-        }).join("")}
-        <div class="legend"><span><i></i>инженеры</span><span><i class="t"></i>техники, мастера, рабочие</span><span>бледный край — «от …» или «до …»</span></div>
-      </div></section>`;
-  }
-  app.addEventListener("click", e => { if (e.target.closest("#salTech")) { salTech = !salTech; render(); } });
-
   /* ================= STUDY ================= */
   const UNI_INFO = {
     "БГТУ": { name: "Белорусский государственный технологический университет", city: "Минск", about: "Химия, шины и полимеры, деревообработка, пластмассы" },
@@ -352,7 +324,7 @@
   function route() {
     const p = location.hash.replace(/^#\/?/, "").split("/");
     if (p[0] === "c" && byId[p[1]]) return { v: "deck", c: byId[p[1]], s: p[2] || "main" };
-    if (["map", "professions", "salaries", "study"].includes(p[0])) return { v: p[0] };
+    if (["map", "professions", "study"].includes(p[0])) return { v: p[0] };
     return { v: "home" };
   }
   let lastKey = "";
@@ -366,7 +338,7 @@
     const cp = $(".cpage");
     if (r.v === "deck" && cp && cp.dataset.id === r.c.id) { scrollToSection(r.s, true); lastKey = location.hash; return; }
     if (map) { map.destroy(); map = null; }
-    app.innerHTML = r.v === "deck" ? deck(r.c) : r.v === "map" ? mapPage() : r.v === "professions" ? profPage() : r.v === "salaries" ? salPage() : r.v === "study" ? studyPage() : home();
+    app.innerHTML = r.v === "deck" ? deck(r.c) : r.v === "map" ? mapPage() : r.v === "professions" ? profPage() : r.v === "study" ? studyPage() : home();
     document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("is-on", a.dataset.nav === (r.v === "deck" ? "home" : r.v)));
     document.title = r.v === "deck" ? `${r.c.short} — Бобруйск промышленный` : "Бобруйск промышленный";
     if (r.v === "map") initMap();
